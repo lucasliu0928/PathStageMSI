@@ -5,27 +5,60 @@
 
 This repository provides a step-by-step workflow for histopathology data analysis, from tile extraction and cancer detection to feature extraction, and MSI prediction, and additional exploratory analyses.
 
-![PathStageMSI overview](figures/Fig1_v2.png)
+<p align="center">
+  <img src="figures/Fig1_v2.png" alt="PathStageMSI overview" width="800">
+</p>
 
 ---
 ## 📚 Table of Contents
 
-- [🧬 I. Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
+- [🚀 Getting Started](#-getting-started)
+  - [Clone the Repository](#clone-the-repository)
+  - [Environment Setup (Example)](#environment-setup-example)
+
+- [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
   - [Step 4 – Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-mutation-prediction)
   - [Step 5 – Evaluate Model Performance](#step-5-evaluate-model-performance)
-
-- [🚀 Getting Started](#-getting-started)
-  - [Clone the Repository](#clone-the-repository)
-  - [Environment Setup (Example)](#environment-setup-example)
  
 ---
 
+## 🚀 Getting Started
+### Clone the repository
+
+```bash
+git clone https://github.com/lucasliu0928/PathStageMSI.git
+cd PathStageMSI
+```
+
+### Environment Setup
+#### For Cancer Detection
+```
+conda env create -f env_files/paimg9.yml
+conda activate paimg9
+```
+
+#### For MSI Prediction:
+```
+conda env create -f env_files/mil.yml
+conda activate mil
+```
+
+## Dependencies
+* For cancer detection
+   - Python 3.8.20  [GCC 13.3.0]
+   - cv2 == 4.10.0
+   - fastai == 2.7.10
+   - torch == 2.4.1+cu121
+   - torchvision == 0.19.1+cu121
+   - openslide == 1.3.1
+   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
+* Python 3.11.11 [GCC 13.3.0]
 
 
-## 🧬 I. Mutation Prediction Pipeline
+## 🧬 Mutation Prediction Pipeline
 
 ### Step 1: Extract Tiles from WSI
 
@@ -101,7 +134,7 @@ python3 -u inference/inference.py \
   --logit_priors_csv configs/logit_priors_summary.csv \
   --folds all \
   --cuda_device auto
-
+```
 
 ### Step 5: Evaluate Model Performance
 If ground-truth labels are available in the prediction CSV, compute bootstrap confidence intervals:
@@ -111,61 +144,11 @@ python inference/bootstrap_performance.py \
   --prediction_csv output/predictions/ensemble_prediction.csv \
   --output_csv output/predictions/bootstrap_performance.csv \
   --cohort_name test
-
-
-
-
-## 🚀 Getting Started
-### Clone the repository
-
-```bash
-git clone https://github.com/lucasliu0928/Path_CancerDetect.git
-cd Path_CancerDetect
 ```
 
-### Environment Setup
-#### For Cancer Detection
-```
-conda env create -f paimg9.yml
-conda activate paimg9
-```
 
-#### For Mutation Prediction:
-##### Transfer MIL:
-```
-conda env create -f mil.yml
-conda activate mil
-```
 
-##### MIL from scratch:
-```
-python3 -m venv acmil
-pip install -r requirements_acmil.txt
-```
 
-#### For Hand-crafted feature extraction:
-
-```
-python3 -m venv hf
-pip install -r requirements_hf.txt
-```
-
-#### For HistoTME:
-```
-conda env create -f histoTME.yml
-conda activate histoTME
-```
-
-## Dependencies
-* For cancer detection
-   - Python 3.8.20  [GCC 13.3.0]
-   - cv2 == 4.10.0
-   - fastai == 2.7.10
-   - torch == 2.4.1+cu121
-   - torchvision == 0.19.1+cu121
-   - openslide == 1.3.1
-   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
-* Python 3.11.11 [GCC 13.3.0]
     
 ## Authors
 Lucas J. Liu 
