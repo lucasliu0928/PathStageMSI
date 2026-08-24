@@ -1,6 +1,5 @@
-# Deep Learning for Gene Pathway Mutation Prediction for Prostate Cancer 
-
-Predict Gene Mutation from H&E WSI Image for Prostate Cancer
+# Image-based Detection of Mismatch Repair Deficiency in Prostate Cancer Using Transfer Learning
+![PathStageMSI overview](figures/Fig1_v2.png)
 
 ## 📋 Overview
 
