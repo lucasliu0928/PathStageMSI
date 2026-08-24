@@ -242,12 +242,12 @@ def validate_columns(df, y_true_col, prob_col, pred_col):
 
 def patient_unit_column(df, requested_unit, patient_id_col):
     if requested_unit == "slide":
-        return None, "slide_stratified_by_label"
+        return None, "slide"
     if patient_id_col in df.columns and df[patient_id_col].notna().all():
-        return patient_id_col, "patient_cluster_stratified_by_label"
+        return patient_id_col, "patient_cluster"
     if requested_unit == "patient":
         raise ValueError(f"--bootstrap_unit patient requires non-missing column: {patient_id_col}")
-    return None, "slide_stratified_by_label"
+    return None, "slide"
 
 
 def patient_label_groups(df, unit_col, y_true_col):
@@ -265,21 +265,34 @@ def patient_label_groups(df, unit_col, y_true_col):
     return groups
 
 
-def resample_dataframe(df, rng, y_true_col, unit_col):
-    if unit_col is None:
-        pieces = []
-        for label, group in df.groupby(y_true_col, sort=False):
-            draw = rng.choice(group.index.to_numpy(), size=len(group), replace=True)
-            pieces.append(df.loc[draw])
+def resample_dataframe(df, rng, y_true_col, unit_col, sampling):
+    if sampling == "vanilla":
+        if unit_col is None:
+            draw = rng.choice(df.index.to_numpy(), size=len(df), replace=True)
+            return df.loc[draw].reset_index(drop=True)
+
+        unit_ids = df[unit_col].drop_duplicates().to_numpy()
+        draw_units = rng.choice(unit_ids, size=len(unit_ids), replace=True)
+        pieces = [df.loc[df[unit_col] == unit_id] for unit_id in draw_units]
         return pd.concat(pieces, ignore_index=True)
 
-    groups = patient_label_groups(df, unit_col, y_true_col)
-    pieces = []
-    for unit_ids in groups.values():
-        draw_units = rng.choice(unit_ids, size=len(unit_ids), replace=True)
-        for unit_id in draw_units:
-            pieces.append(df.loc[df[unit_col] == unit_id])
-    return pd.concat(pieces, ignore_index=True)
+    if sampling == "stratified":
+        if unit_col is None:
+            pieces = []
+            for _label, group in df.groupby(y_true_col, sort=False):
+                draw = rng.choice(group.index.to_numpy(), size=len(group), replace=True)
+                pieces.append(df.loc[draw])
+            return pd.concat(pieces, ignore_index=True)
+
+        groups = patient_label_groups(df, unit_col, y_true_col)
+        pieces = []
+        for unit_ids in groups.values():
+            draw_units = rng.choice(unit_ids, size=len(unit_ids), replace=True)
+            for unit_id in draw_units:
+                pieces.append(df.loc[df[unit_col] == unit_id])
+        return pd.concat(pieces, ignore_index=True)
+
+    raise ValueError(f"Unknown bootstrap sampling mode: {sampling}")
 
 
 def summarize_bootstrap(perf_df, ci):
@@ -311,7 +324,7 @@ def summarize_cohort(df, cohort_name, args, prob_col, pred_col):
     rng = np.random.default_rng(args.seed)
     rows = []
     for _ in range(args.n_bootstrap):
-        sample = resample_dataframe(df, rng, args.y_true_col, unit_col)
+        sample = resample_dataframe(df, rng, args.y_true_col, unit_col, args.bootstrap_sampling)
         rows.append(compute_metrics(sample[args.y_true_col], sample[prob_col], sample[pred_col], args.pr_auc_method))
     perf_df = pd.DataFrame(rows)
     summary = summarize_bootstrap(perf_df, args.ci)
@@ -328,6 +341,8 @@ def summarize_cohort(df, cohort_name, args, prob_col, pred_col):
         "probability_column": prob_col,
         "prediction_column": pred_col,
         "bootstrap_unit": bootstrap_unit,
+        "bootstrap_sampling": args.bootstrap_sampling,
+        "valid_auc_bootstrap": int(perf_df["ROC_AUC"].notna().sum()),
         "pr_auc_method": args.pr_auc_method,
     }
     result.update(summary)
@@ -362,12 +377,18 @@ def build_parser():
     parser.add_argument("--n_bootstrap", default=1000, type=int)
     parser.add_argument(
         "--pr_auc_method",
-        default="average_precision",
-        choices=["average_precision", "trapezoid"],
-        help="Definition used for PR_AUC. average_precision matches sklearn average_precision_score.",
+        default="trapezoid",
+        choices=["trapezoid", "average_precision"],
+        help="Definition used for PR_AUC. The default matches the paper-publication workflow.",
     )
     parser.add_argument("--ci", default=95, type=float)
     parser.add_argument("--seed", default=42, type=int)
+    parser.add_argument(
+        "--bootstrap_sampling",
+        default="vanilla",
+        choices=["vanilla", "stratified"],
+        help="vanilla matches the paper-publication workflow; stratified preserves label counts.",
+    )
     parser.add_argument("--bootstrap_unit", default="auto", choices=["auto", "patient", "slide"])
     return parser
 
