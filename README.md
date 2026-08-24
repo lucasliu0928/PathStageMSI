@@ -46,7 +46,7 @@ conda env create -f env_files/mil.yml
 conda activate mil
 ```
 
-## Dependencies
+## Main Dependencies
 * For cancer detection
    - Python 3.8.20  [GCC 13.3.0]
    - cv2 == 4.10.0
@@ -55,7 +55,18 @@ conda activate mil
    - torchvision == 0.19.1+cu121
    - openslide == 1.3.1
    - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
-* Python 3.11.11 [GCC 13.3.0]
+* For MSI prediction
+  - Python 3.9.23 [GCC 13.3.0]
+  - torch == 2.8.0
+  - torchvision == 0.23.0
+  - pandas == 2.3.2
+  - numpy == 1.26.4
+  - scipy == 1.13.1
+  - scikit-learn == 1.6.1
+  - h5py == 3.14.0
+  - tqdm == 4.67.1
+  - nystrom-attention == 0.0.14
+  - einops == 0.8.1
 
 
 ## 🧬 Mutation Prediction Pipeline
