@@ -1,9 +1,11 @@
 # Image-based Detection of Mismatch Repair Deficiency in Prostate Cancer Using Transfer Learning
-![PathStageMSI overview](figures/Fig1_v2.png)
+
 
 ## 📋 Overview
 
-This repository provides a step-by-step workflow for histopathology data analysis, from tile extraction and cancer detection to feature extraction, mutation prediction, and additional exploratory analyses.
+This repository provides a step-by-step workflow for histopathology data analysis, from tile extraction and cancer detection to feature extraction, and MSI prediction, and additional exploratory analyses.
+
+![PathStageMSI overview](figures/Fig1_v2.png)
 
 ---
 ## 📚 Table of Contents
@@ -12,12 +14,9 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
-  - [Step 4 – Train Mutation Prediction Model – 🚧 TODO](#step-4-train-mutation-prediction-model)
-  - [Step 5 – Run Inference for Mutation Prediction – 🚧 TODO](#step-5-run-inference-for-mutation-prediction)
-  - [Step 6 – Evaluate Model Performance – 🚧 TODO](#step-6-evaluate-model-performance)
-- [🧩 II. Additional Analyses](#-ii-additional-analyses)
-  1. [Analyze Tumor Microenvironment (TME)](#i-analyze-tumor-microenvironment-tme)
-  2. [Analyze Hand-Crafted Features – 🚧 TODO](#ii-analyze-hand-crafted-features--todo)
+  - [Step 4 – Run Inference for Mutation Prediction – 🚧 TODO](#step-5-run-inference-for-mutation-prediction)
+  - [Step 5 – Evaluate Model Performance – 🚧 TODO](#step-6-evaluate-model-performance)
+
 - [🚀 Getting Started](#-getting-started)
   - [Clone the Repository](#clone-the-repository)
   - [Environment Setup (Example)](#environment-setup-example)
@@ -85,73 +84,17 @@ python3 -u 4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tun
   - `modelname`: One of `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`
     
 
-### Step 4: Train Mutation Prediction Model -  🚧 TODO
-
-### Step 5: Run Inference for Mutation Prediction -  🚧 TODO
+### Step 4: Run Inference for Mutation Prediction -  🚧 TODO
 Use the trained model to predict mutation status on unseen samples:
 - Load saved model checkpoints
 - Apply same preprocessing and feature aggregation as in training
 - Output mutation probabilities and predicted labels
 
-### Step 6: Evaluate Model Performance -  🚧 TODO
+### Step 5: Evaluate Model Performance -  🚧 TODO
 Compute and report key performance metrics:
 - ROC-AUC, accuracy, precision, recall, F1-score
 - Per-mutation / per-pathway performance breakdowns 
 
-
-## 🧩 II. Additional Analyses 
-
-### i. Analyze Tumor Microenvironment (TME)
-Perform TME profiling (e.g., with HistoTME tool):
-
-#### Step 1: Reformat data for HistoTME (https://github.com/spatkar94/HistoTME)
-This step generate input data for running HistoTME
-
-```
-conda activate histoTME
-cd cancer_detection_final/histoTME
-python3 0_reformat_data.py --fe_method uni2 --cohort_name TCGA_PRAD --tumor_frac 0.0
-```
-**Available models:** Please refer to their official website for available foundation models
-
-**Generated output:**
-- `sampleid_features.hdf5` — Tile-level embedding features with features and coords
-
-#### Step 2A: Run inference for a bulk of slides
-This step runs the HistoTME model to compute slide-level (bulk) signatures.
-
-```
-conda activate histoTME
-cd /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/other_model_code/HistoTME/HistoTME_regression
-python3 predict_bulk.py  --cohort TCGA_PRAD --h5_folder /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/intermediate_data/0_HistoTME/model_data/TF0.0/TCGA_PRAD/IMSIZE250_OL0/uni2 --chkpts_dir /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/other_model_code/HistoTME/local_dir/checkpoints  --save_loc /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/intermediate_data/0_HistoTME/TME/TF0.0/ --num_workers 10 --embed uni2 
-```
-
-#### Step 2B: Run spatial inference for each slide
-This step runs HistoTME in spatial mode to compute tile-level (spatial) signatures.
-
-```
-conda activate histoTME
-cd /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/other_model_code/HistoTME/HistoTME_regression
-python3 predict_spatial.py  --h5_path /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/intermediate_data/0_HistoTME/model_data/TF0.0/TCGA_PRAD/IMSIZE250_OL0/uni2/TCGA_PRAD_XXXX_features.hdf5 --chkpts_dir /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/other_model_code/HistoTME/local_dir/checkpoints  --save_loc /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/intermediate_data/0_HistoTME/TME_Spatial/TF0.0/ --num_workers 10 --embed uni2 
-```
-
-Note on Modifications :
-I added the following code to "data.py" in "HistoTME_regression folder" to make it easier to match all embedding model names and the names in the arguments for python predict_spatial.py [-h] [--h5_path H5_PATH] [--chkpts_dir CHKPTS_DIR] [--num_workers NUM_WORKERS]
-[--embed EMBED] [--save_loc SAVE_LOC]
-
-```
-elif 'uni1' in embedding_paths[0]:
-    embedding_dim = 1024
-elif 'uni2' in embedding_paths[0]:
-    embedding_dim = 1536
-```
-
-### ii. Analyze Hand-Crafted Features – 🚧 TODO
-
-```
-source /fh/fast/etzioni_r/Lucas/mh_proj/mutation_pred/other_ppl_code/handcrafted_features/hf_env/bin/activate
-python3 -u 6_extract_handfeat.py  --cohort_name Pluvicto_Pretreatment_bx --select_idx_start $start_idx --select_idx_end $end_idx --fine_tuned_model False
-```
 
 
 
