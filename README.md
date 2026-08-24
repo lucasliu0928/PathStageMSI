@@ -6,7 +6,7 @@
 This repository provides a step-by-step workflow for histopathology data analysis, from tile extraction and cancer detection to feature extraction, and MSI prediction, and additional exploratory analyses.
 
 <p align="center">
-  <img src="figures/Fig1_v2.png" alt="PathStageMSI overview" width="800">
+  <img src="figures/Fig1_v2.png" alt="PathStageMSI overview" width="400">
 </p>
 
 ---
