@@ -77,7 +77,7 @@ This step processes the Whole Slide Image (WSI) into tiles (e.g., keeping tiles 
 
 ```bash
 conda activate paimg9
-cd cancer_detection_final
+cd cancer_detection_feature_generation
 python3 -u 1_extract_patches_fixed-res.py \
   --cohort_name TCGA_PRAD \
   --pixel_overlap 0
@@ -122,7 +122,7 @@ cd cancer_detection_final
 python3 -u 4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tuned_model True --feature_extraction_method uni2
 ```
 
-**Suuported models:** `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`.
+**Supported models:** `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`.
 **Generated output:**
 - `sampleid/features_alltiles_modelname.h5` — Tile-level embedding features  
   - `modelname`: One of `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`
