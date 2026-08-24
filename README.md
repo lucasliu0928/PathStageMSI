@@ -20,7 +20,7 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
-  - [Step 4 – Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-MSI-H/dMMR-prediction)
+  - [Step 4 – Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction)
   - [Step 5 – Evaluate Model Performance](#step-5-evaluate-model-performance)
  
 ---
