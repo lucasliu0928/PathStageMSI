@@ -1,0 +1,4 @@
+.DS_Store
+output/
+examples/
+__pycache__/

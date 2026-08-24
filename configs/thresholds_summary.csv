@@ -1,0 +1,6 @@
+fold,infer_tumor_frac,saved_threshold_row,saved_threshold_col,threshold
+0,0.0,OPX_TCGA_valid,best_thresh,0.4731000051822559
+1,0.0,OPX_TCGA_valid,best_thresh,0.3992485654134114
+2,0.0,OPX_TCGA_valid,best_thresh,0.1823069537889769
+3,0.0,OPX_TCGA_valid,best_thresh,0.49796520021117047
+4,0.0,OPX_TCGA_valid,best_thresh,0.38597502833474157
