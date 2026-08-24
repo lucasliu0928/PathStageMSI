@@ -14,8 +14,8 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
-  - [Step 4 – Run Inference for Mutation Prediction – 🚧 TODO](#step-5-run-inference-for-mutation-prediction)
-  - [Step 5 – Evaluate Model Performance – 🚧 TODO](#step-6-evaluate-model-performance)
+  - [Step 4 – Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-mutation-prediction)
+  - [Step 5 – Evaluate Model Performance](#step-5-evaluate-model-performance)
 
 - [🚀 Getting Started](#-getting-started)
   - [Clone the Repository](#clone-the-repository)
@@ -84,16 +84,33 @@ python3 -u 4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tun
   - `modelname`: One of `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`
     
 
-### Step 4: Run Inference for Mutation Prediction -  🚧 TODO
-Use the trained model to predict mutation status on unseen samples:
-- Load saved model checkpoints
-- Apply same preprocessing and feature aggregation as in training
-- Output mutation probabilities and predicted labels
+### Step 4: Run Inference for MSI-H/dMMR Prediction
 
-### Step 5: Evaluate Model Performance -  🚧 TODO
-Compute and report key performance metrics:
-- ROC-AUC, accuracy, precision, recall, F1-score
-- Per-mutation / per-pathway performance breakdowns 
+This step runs locked models for MSI prediction.
+
+```bash
+conda activate mil
+cd PathStageMSI
+
+python3 -u inference/inference.py \
+  --test_data /path/to/test_data.pth \
+  --model_dir locked_models \
+  --output_dir output/predictions \
+  --output_subdir none \
+  --threshold_csv configs/thresholds_summary.csv \
+  --logit_priors_csv configs/logit_priors_summary.csv \
+  --folds all \
+  --cuda_device auto
+
+
+### Step 5: Evaluate Model Performance
+If ground-truth labels are available in the prediction CSV, compute bootstrap confidence intervals:
+
+```bash
+python inference/bootstrap_performance.py \
+  --prediction_csv output/predictions/ensemble_prediction.csv \
+  --output_csv output/predictions/bootstrap_performance.csv \
+  --cohort_name test
 
 
 
