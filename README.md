@@ -19,6 +19,8 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Clone the Repository](#clone-the-repository)
   - [Environment Setup (Example)](#environment-setup-example)
 
+- [📦 Example Data](#-example-data)
+
 - [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
@@ -71,6 +73,11 @@ conda activate mil
   - nystrom-attention == 0.0.14
   - einops == 0.8.1
 
+## 📦 Example Data
+
+The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
+
+[Download example data from Zenodo](https://doi.org/10.5281/zenodo.22089643)
 
 ## 🧬 Mutation Prediction Pipeline
 
