@@ -4,6 +4,8 @@
 
 Liu L.J., Etzioni R., Zhang H., Sayar E., Richards H., Chen Z., et al., Pritchard C.C., Haffner M.C., and Harmon S. Image-based Detection of Mismatch Repair Deficiency in Prostate Cancer Using Transfer Learning. *Clinical Cancer Research (CCR).* Accepted, Aug 2026.
 
+![PathStage-MSI workflow](pathstage-msi.gif)
+
 ## 📋 Overview
 
 This repository provides a step-by-step workflow for histopathology data analysis, from tile extraction and cancer detection to feature extraction, and MSI prediction, and additional exploratory analyses.
