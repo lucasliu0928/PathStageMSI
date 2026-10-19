@@ -116,7 +116,6 @@ See [Step 5: Evaluate Model Performance](#step-5-evaluate-model-performance) for
 
 ## 🧬 Mutation Prediction Pipeline
 Before running the full pipeline, follow [Environment Setup for the Full WSI Pipeline](#environment-setup-for-the-full-wsi-pipeline).
-Run each command block below starting from the repository root.
 
 ### Step 1: Extract Tiles from WSI
 
