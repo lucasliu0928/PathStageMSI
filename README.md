@@ -18,6 +18,7 @@ This repository provides a step-by-step workflow for histopathology data analysi
 ## 📚 Table of Contents
 
 - [🚀 Getting Started](#-getting-started)
+  - [Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
   - [Clone the Repository](#clone-the-repository)
   - [Environment Setup (Example)](#environment-setup-example)
 
