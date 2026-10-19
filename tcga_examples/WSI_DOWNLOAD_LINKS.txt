@@ -1,0 +1,23 @@
+TCGA example whole-slide image (WSI) downloads
+
+These four original diagnostic slides are available as open-access files from
+the NCI Genomic Data Commons (GDC). Source: NCI Genomic Data Commons / The Cancer Genome Atlas (TCGA)
+GDC portal: https://portal.gdc.cancer.gov/
+
+TCGA-HC-7737
+Filename: TCGA-HC-7737-01Z-00-DX1.44947b83-a5b8-43f7-b0a4-0a63f1d42844.svs
+GDC slide page: https://portal.gdc.cancer.gov/files/f2894e3c-ca2c-4dd9-830e-843a61a1c5d3
+
+TCGA-HC-7747
+Filename: TCGA-HC-7747-01Z-00-DX1.1fd2554f-29b9-4a9e-9fe1-93a1bc29f319.svs
+GDC slide page: https://portal.gdc.cancer.gov/files/110e8cc7-6bb6-4990-bfb3-7eaccd080d68
+
+TCGA-HC-8216
+Filename: TCGA-HC-8216-01Z-00-DX1.3629EA7F-6A2F-45FE-9B51-C27847BA43F8.svs
+GDC slide page: https://portal.gdc.cancer.gov/files/79f96691-46c1-4ee3-ab13-08d683a83bb9
+
+TCGA-XK-AAIW
+Filename: TCGA-XK-AAIW-01Z-00-DX1.31B98849-4AA9-4AC1-A697-A0C4165976B5.svs
+GDC slide page: https://portal.gdc.cancer.gov/files/6dbcf931-fe34-41e6-8731-93518818a5a2
+
+
