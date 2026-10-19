@@ -81,6 +81,8 @@ The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
 
 [Download example data from Zenodo](https://doi.org/10.5281/zenodo.22089643)
 
+See [Run the four TCGA examples](tcga_examples/README.md) for inference commands, ensemble attention maps, and expected results.
+
 ## 🧬 Mutation Prediction Pipeline
 
 ### Step 1: Extract Tiles from WSI
@@ -152,11 +154,8 @@ python3 -u inference/inference.py \
   --test_data /path/to/test_data.pth \
   --model_dir locked_models \
   --output_dir output/predictions \
-  --output_subdir none \
   --threshold_csv configs/thresholds_summary.csv \
-  --logit_priors_csv configs/logit_priors_summary.csv \
-  --folds all \
-  --cuda_device auto
+  --logit_priors_csv configs/logit_priors_summary.csv
 ```
 
 ### Step 5: Evaluate Model Performance

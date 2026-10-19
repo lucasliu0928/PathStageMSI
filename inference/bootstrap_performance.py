@@ -31,7 +31,6 @@ METRIC_COLUMNS = [
     "F1",
     "F2",
     "F3",
-    "MCC",
     "TP",
     "TN",
     "FP",
@@ -105,7 +104,11 @@ def trapezoid_pr_auc_binary(y_true, y_score):
     precision, recall = precision_recall_points(y_true, y_score)
     if precision is None:
         return np.nan
-    return float(np.trapezoid(np.r_[1.0, precision], np.r_[0.0, recall]))
+    # NumPy < 2.0 provides trapz; newer releases provide trapezoid.
+    integrate = getattr(np, "trapezoid", None)
+    if integrate is None:
+        integrate = np.trapz
+    return float(integrate(np.r_[1.0, precision], np.r_[0.0, recall]))
 
 
 def pr_auc_binary(y_true, y_score, method):
@@ -138,9 +141,6 @@ def compute_metrics(y_true, y_prob, y_pred, pr_auc_method="average_precision"):
     f2 = fbeta(precision, recall, beta=2)
     f3 = fbeta(precision, recall, beta=3)
 
-    mcc_denom = np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-    mcc = np.nan if mcc_denom == 0 else ((tp * tn) - (fp * fn)) / mcc_denom
-
     if len(np.unique(y_true)) == 2:
         roc_auc = roc_auc_binary(y_true, y_prob)
         pr_auc = pr_auc_binary(y_true, y_prob, pr_auc_method)
@@ -162,7 +162,6 @@ def compute_metrics(y_true, y_prob, y_pred, pr_auc_method="average_precision"):
         "F1": f1,
         "F2": f2,
         "F3": f3,
-        "MCC": mcc,
         "TP": tp,
         "TN": tn,
         "FP": fp,

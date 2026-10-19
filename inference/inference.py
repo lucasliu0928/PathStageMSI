@@ -3,8 +3,9 @@
 """
 Public-facing locked-model inference entry point.
 
-This script writes predictions only. Performance summaries, including
-bootstrapped confidence intervals, are produced by bootstrap_performance.py.
+This script writes ensemble_prediction.csv and ensemble_performance.csv. Slide-level point performance is printed
+after inference. Optional bootstrapped confidence intervals can be computed
+separately with bootstrap_performance.py.
 
 Run from the PathStageMSI root, for example:
 
@@ -12,7 +13,6 @@ Run from the PathStageMSI root, for example:
         --test_data examples/test.pth \
         --model_dir locked_models \
         --output_dir output/predictions_tcga \
-        --output_subdir none \
         --threshold_csv configs/thresholds_summary.csv \
         --logit_priors_csv configs/logit_priors_summary.csv
 """
@@ -20,7 +20,6 @@ Run from the PathStageMSI root, for example:
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 import types
 from pathlib import Path
@@ -29,8 +28,10 @@ import numpy as np
 import pandas as pd
 import torch
 
+from bootstrap_performance import compute_metrics
+
 THIS_DIR = Path(__file__).resolve().parent
-LOCKED_INFER_PATH = THIS_DIR / "7_locked_model_new_test.py"
+LOCKED_INFER_PATH = THIS_DIR / "Utils" / "7_locked_model_new_test.py"
 
 
 def unavailable_training_helper(*_args, **_kwargs):
@@ -93,7 +94,7 @@ _original_load_saved_threshold = locked.load_saved_threshold
 def build_parser():
     parser = _original_build_parser()
     parser.prog = "inference.py"
-    parser.description = "Run PathStageMSI locked-model inference and write prediction CSVs only."
+    parser.description = "Run PathStageMSI locked-model inference and write ensemble predictions and point performance."
     parser.add_argument(
         "--threshold_csv",
         default=None,
@@ -239,13 +240,84 @@ def fold_logit_adjustment(args, val_data, fold):
     return logit_adjustments, priors, tau if priors_path is not None else tau
 
 
+def collect_patient_ids(records):
+    """Preserve patient identifiers for patient-cluster performance bootstraps."""
+    patients = {}
+    for index, record in enumerate(records):
+        fallback = f"case_{index:05d}"
+        tile_info = None
+        patient_id = None
+        if isinstance(record, dict):
+            sample_id = str(record.get("sample_id", fallback))
+            patient_id = record.get("patient_id", record.get("PATIENT_ID"))
+            tile_info = record.get("tile_info")
+        elif isinstance(record, (tuple, list)):
+            if len(record) > 3 and isinstance(record[3], pd.DataFrame):
+                tile_info = record[3]
+                values = tile_info.get("SAMPLE_ID", pd.Series(dtype=str)).dropna().unique()
+                sample_id = str(values[0]) if len(values) else fallback
+            else:
+                sample_id = str(record[4]) if len(record) > 4 and isinstance(record[4], str) else fallback
+        else:
+            continue
+        if patient_id is None or pd.isna(patient_id) or str(patient_id).strip() == "":
+            if isinstance(tile_info, pd.DataFrame) and "PATIENT_ID" in tile_info:
+                values = tile_info["PATIENT_ID"].dropna().unique()
+                if len(values) > 1:
+                    raise ValueError(f"Multiple patient IDs for slide {sample_id}")
+                patient_id = values[0] if len(values) else None
+        if patient_id is None or pd.isna(patient_id) or str(patient_id).strip() == "":
+            # TCGA slide barcodes contain the participant ID in the first three fields.
+            patient_id = "-".join(sample_id.split("-")[:3]) if sample_id.startswith("TCGA-") else pd.NA
+        if isinstance(patient_id, bytes):
+            patient_id = patient_id.decode("utf-8")
+        patients[sample_id] = patient_id
+    return patients
+
+
+def minimal_prediction_output(ensemble, patient_ids, use_logit_adjustment):
+    """Keep all-fold scores and majority-vote labels used for final performance."""
+    score_column = "mean_adj_prob" if use_logit_adjustment else "mean_prob"
+    result = ensemble[["SAMPLE_ID", "True_y", score_column, "majority_class"]].copy()
+    result.insert(1, "PATIENT_ID", result["SAMPLE_ID"].map(patient_ids))
+    return result
+
+
 def load_test_data(args):
     test_records = []
     if args.test_data:
         test_records.extend(locked.load_case_records(args.test_data))
     if args.feature_dir is not None:
         test_records.extend(locked.load_feature_records(args.feature_dir, args))
-    return locked.prepare_eval_data(test_records, args, split=args.split)
+    eval_data, sample_ids = locked.prepare_eval_data(test_records, args, split=args.split)
+    return eval_data, sample_ids, collect_patient_ids(test_records)
+
+
+def print_point_performance(ensemble, use_logit_adjustment):
+    """Evaluate the ensemble once, with the manuscript metric definitions."""
+    score_column = "mean_adj_prob" if use_logit_adjustment else "mean_prob"
+    metrics = compute_metrics(
+        ensemble["True_y"], ensemble[score_column], ensemble["majority_class"],
+        pr_auc_method="trapezoid",
+    )
+    positive = int((ensemble["True_y"] == 1).sum())
+    negative = int((ensemble["True_y"] == 0).sum())
+    print("\nPoint performance (slide level; no bootstrapping)")
+    print(f"Slides: {len(ensemble)} | Positive: {positive} | Negative: {negative}")
+    if "PATIENT_ID" in ensemble and ensemble["PATIENT_ID"].notna().all():
+        print(f"Patients: {ensemble['PATIENT_ID'].nunique()}")
+    labels = {
+        "ROC_AUC": "AUROC", "PR_AUC": "PR-AUC (trapezoidal)",
+        "Recall": "Sensitivity", "Precision": "PPV", "ACC": "Accuracy",
+        "balanced_accuracy": "Balanced accuracy",
+    }
+    for name, value in metrics.items():
+        if name in {"TP", "TN", "FP", "FN"}:
+            formatted = str(int(value))
+        else:
+            formatted = f"{value:.4f}" if np.isfinite(value) else "N/A"
+        print(f"{labels.get(name, name):<25} {formatted}")
+    return metrics
 
 
 def main():
@@ -267,28 +339,14 @@ def main():
     if not model_dir.exists():
         raise FileNotFoundError(f"Locked model directory does not exist: {model_dir}")
 
-    test_data, test_sample_ids = load_test_data(args)
+    test_data, test_sample_ids, patient_ids = load_test_data(args)
 
     val_data = None
-    val_sample_ids = None
     if args.val_data:
         val_records = locked.load_case_records(args.val_data)
-        val_data, val_sample_ids = locked.prepare_eval_data(val_records, args, split="all")
+        val_data, _ = locked.prepare_eval_data(val_records, args, split="all")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    config = vars(args).copy()
-    config.update(
-        {
-            "project_dir": str(project_dir),
-            "model_dir": str(model_dir),
-            "output_dir": str(output_dir),
-            "folds": folds,
-            "device": str(device),
-            "output_contract": "predictions_only",
-        }
-    )
-    (output_dir / "run_config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
-
     n_feature = test_data[0][0].shape[1]
     all_fold_predictions = []
     fold_thresholds = []
@@ -305,29 +363,10 @@ def main():
 
         threshold = args.pred_threshold
         threshold_path = None
-        fold_dir = output_dir / f"FOLD{fold}"
-        fold_dir.mkdir(parents=True, exist_ok=True)
 
         if args.use_saved_threshold:
             threshold, threshold_path = load_saved_threshold(args, model_dir, fold)
             print(f"FOLD{fold}: using threshold {threshold} from {threshold_path}")
-        elif val_data is not None and args.use_val_threshold:
-            val_pred = locked.predict_dataframe(
-                val_data,
-                val_sample_ids,
-                model,
-                args.model_name,
-                device,
-                logit_adjustments,
-                threshold=args.pred_threshold,
-                use_logit_adjustment=args.logit_adj_infer,
-                desc=f"FOLD{fold} validation",
-            )
-            val_perf = locked.safe_performance(val_pred, f"FOLD{fold}_validation", args.logit_adj_infer)
-            val_pred.to_csv(fold_dir / "validation_prediction.csv", index=False)
-            if val_perf is not None:
-                threshold = float(val_perf["best_thresh"].iloc[0])
-
         fold_thresholds.append(threshold)
         pred_df = locked.predict_dataframe(
             test_data,
@@ -343,15 +382,13 @@ def main():
         pred_df.insert(0, "FOLD", fold)
         pred_df["threshold"] = threshold
         pred_df["checkpoint"] = checkpoint_path.name
-        pred_df.to_csv(fold_dir / "test_prediction.csv", index=False)
         all_fold_predictions.append(pred_df)
 
     all_pred = pd.concat(all_fold_predictions, ignore_index=True)
-    all_pred.to_csv(output_dir / "all_folds_prediction.csv", index=False)
 
     threshold_ensemble = (
         float(np.mean(fold_thresholds))
-        if args.use_saved_threshold or args.use_val_threshold
+        if args.use_saved_threshold
         else args.pred_threshold
     )
     ensemble = locked.build_majority_vote_ensemble(
@@ -359,10 +396,20 @@ def main():
         use_logit_adjustment=args.logit_adj_infer,
         threshold=threshold_ensemble,
     )
+    ensemble = minimal_prediction_output(ensemble, patient_ids, args.logit_adj_infer)
     ensemble.to_csv(output_dir / "ensemble_prediction.csv", index=False)
 
-    print(f"Done. Prediction CSVs written to: {output_dir}")
-    print("Performance is intentionally not computed here. Use inference/bootstrap_performance.py next.")
+    print(f"Done. Ensemble predictions written to: {output_dir / 'ensemble_prediction.csv'}")
+    metrics = print_point_performance(ensemble, args.logit_adj_infer)
+    point_metrics = {
+        "N_slides": len(ensemble),
+        "N_patients": ensemble["PATIENT_ID"].nunique() if ensemble["PATIENT_ID"].notna().all() else pd.NA,
+        "N_positive_slides": int((ensemble["True_y"] == 1).sum()),
+        "N_negative_slides": int((ensemble["True_y"] == 0).sum()),
+        **metrics,
+    }
+    pd.DataFrame([point_metrics]).to_csv(output_dir / "ensemble_performance.csv", index=False)
+    print(f"Point performance written to: {output_dir / 'ensemble_performance.csv'}")
 
 
 if __name__ == "__main__":
