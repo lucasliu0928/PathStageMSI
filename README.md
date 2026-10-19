@@ -110,7 +110,7 @@ This step applies a trained cancer detection model to the extracted tiles.
 
 ```
 conda activate paimg9
-cd cancer_detection_final
+cd cancer_detection_feature_generation
 python3 -u 2_cancer_inference_fixed-res.py --cohort_name TCGA_PRAD  --fine_tuned_model True --pixel_overlap 0 
 ```
 
@@ -137,7 +137,7 @@ This step uses selected foundation models to compute tile-level embeddings.
 
 ```
 conda activate paimg9
-cd cancer_detection_final
+cd cancer_detection_feature_generation
 python3 -u 4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tuned_model True --feature_extraction_method uni2
 ```
 
