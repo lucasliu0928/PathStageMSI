@@ -19,9 +19,9 @@ This repository provides a step-by-step workflow for histopathology data analysi
 
 - [🚀 Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
 
-- [📦 Run Inference for all TCGA test data](#run-inference-for-all-tcga-test-data)
+- [📦 Run Inference for all TCGA test data](#-run-inference-for-all-tcga-test-data)
 
-- [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
+- [🧬 Mutation Prediction Pipeline](#-mutation-prediction-pipeline)
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
   - [Step 2 – Run Cancer Detection](#step-2-run-cancer-detection)
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
@@ -102,13 +102,13 @@ For each case, the following files are saved under `output/tcga_four_examples/en
 - `<SAMPLE_ID>_ensemble_attention_plot_data.csv`: tile coordinates, raw ensemble attention (`mean_att`), and normalized plotting values (`attention_heatmap_value`).
 - `<SAMPLE_ID>_ensemble_attention.png`: attention heatmap.
 
-These four cases provide a quick demonstration. See **Other Example Data** below for the complete TCGA test dataset.
+These four cases provide a quick demonstration. See [Run Inference for all TCGA test data](#-run-inference-for-all-tcga-test-data) below for the complete TCGA test dataset.
 
 ---
 
 ## 📦 Run Inference for all TCGA test data
 
-The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
+The complete model-ready TCGA-PRAD test dataset is available on Zenodo:
 [Download example data from Zenodo](https://doi.org/10.5281/zenodo.22089643)
 
 See [Step 4: Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction) for inference instructions.  
@@ -185,8 +185,7 @@ This step runs locked models for MSI prediction.
 
 ```bash
 conda activate mil
-cd inference
-python3 -u inference.py \
+python3 -u inference/inference.py \
   --test_data /path/to/test_data.pth \
   --model_dir locked_models \
   --output_dir output/predictions \
@@ -198,8 +197,7 @@ python3 -u inference.py \
 If ground-truth labels are available in the prediction CSV, compute bootstrap confidence intervals:
 
 ```bash
-cd inference
-python3 bootstrap_performance.py \
+python3 inference/bootstrap_performance.py \
   --prediction_csv output/predictions/ensemble_prediction.csv \
   --output_csv output/predictions/bootstrap_performance.csv \
   --cohort_name test
