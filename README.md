@@ -104,7 +104,6 @@ python3 -u 1_extract_patches_fixed-res.py \
 - `sampleid_tissue.json`  — Tissue region annotations  
 ---
 
-
 ### Step 2: Run Cancer Detection
 
 This step applies a trained cancer detection model to the extracted tiles.
@@ -124,7 +123,13 @@ python3 -u 2_cancer_inference_fixed-res.py --cohort_name TCGA_PRAD  --fine_tuned
   - `TF`: Tumor fraction score  
 - `sampleid_cancer.json` — Cancer region annotations
   
+### Stain Normalization
 
+Stain normalization is enabled by default (`--stain_norm norm`) for both cancer detection (Step 2) and embedding extraction (Step 3). Tiles are normalized using HistomicsTK's `deconvolution_based_normalization()` with the reference image included in this repository:
+
+`stain_norm_img/SU21-19308_A1-2_HE_40X_MH110821_40_16500-20500_500-500.png`
+
+To disable stain normalization, add `--stain_norm no_norm` to the corresponding command.
 
 ### Step 3: Generate Embeddings
 
