@@ -21,7 +21,7 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Clone the Repository](#clone-the-repository)
   - [Environment Setup (Example)](#environment-setup-example)
 
-- [📦 Example Data](#-example-data)
+- [📦 Other Example Data](#other-example-data)
 
 - [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
@@ -74,8 +74,84 @@ conda activate mil
   - tqdm == 4.67.1
   - nystrom-attention == 0.0.14
   - einops == 0.8.1
+ 
 
-## 📦 Example Data
+## Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps
+
+Run PathStageMSI on four TCGA-PRAD example cases using precomputed, model-ready UNI2 features. 
+### 1. Set up the environment
+```bash
+git clone https://github.com/lucasliu0928/PathStageMSI.git
+cd PathStageMSI
+
+conda env create -f env_files/mil.yml
+conda activate mil
+```
+
+### 2. Check the example files
+The following feature files should be in `tcga_examples/`:
+```text
+tcga_examples/
+├── TCGA-XK-AAIW_uni2.h5
+├── TCGA-HC-7747_uni2.h5
+├── TCGA-HC-8216_uni2.h5
+└── TCGA-HC-7737_uni2.h5
+```
+The repository must also contain the five model checkpoints in `locked_models/` and the configuration files in `configs/`.
+
+### 3. Run prediction
+
+```bash
+python3 -u inference/inference.py \
+  --test_data \
+    tcga_examples/TCGA-XK-AAIW_uni2.h5 \
+    tcga_examples/TCGA-HC-7747_uni2.h5 \
+    tcga_examples/TCGA-HC-8216_uni2.h5 \
+    tcga_examples/TCGA-HC-7737_uni2.h5 \
+  --model_dir locked_models \
+  --threshold_csv configs/thresholds_summary.csv \
+  --logit_priors_csv configs/logit_priors_summary.csv \
+  --cuda_device auto \
+  --output_dir output/tcga_four_examples
+```
+
+### 4. View prediction results
+
+Results are saved in `output/tcga_four_examples/`:
+
+- `ensemble_prediction.csv`: case-level scores and predictions.
+- `ensemble_performance.csv`: performance on the four example cases.
+
+In the prediction CSV:
+
+- `mean_adj_prob`: mean adjusted positive-class probability across the five folds.
+- `majority_class`: majority-vote prediction across folds; `1` indicates MSI-H/dMMR positive and `0` indicates negative.
+- `True_y`: ground-truth label supplied with the example data.
+
+### 5. Generate attention heatmaps for the four cases
+
+```bash
+python3 -u inference/generate_attention.py \
+  --test_data \
+    tcga_examples/TCGA-XK-AAIW_uni2.h5 \
+    tcga_examples/TCGA-HC-7747_uni2.h5 \
+    tcga_examples/TCGA-HC-8216_uni2.h5 \
+    tcga_examples/TCGA-HC-7737_uni2.h5 \
+  --model_dir locked_models \
+  --cuda_device auto \
+  --output_dir output/tcga_four_examples
+```
+
+For each case, the following files are saved under `output/tcga_four_examples/ensemble_attention/`:
+
+- `<SAMPLE_ID>_ensemble_attention_plot_data.csv`: tile coordinates, raw ensemble attention (`mean_att`), and normalized plotting values (`attention_heatmap_value`).
+- `<SAMPLE_ID>_ensemble_attention.png`: attention heatmap.
+
+These four cases provide a quick demonstration. See **Other Example Data** below for the complete TCGA test dataset.
+
+---
+
+## 📦 Other Example Data
 
 The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
 
