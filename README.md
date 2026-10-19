@@ -19,7 +19,7 @@ This repository provides a step-by-step workflow for histopathology data analysi
 
 - [🚀 Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
 
-- [📦 Other Example Data](#other-example-data)
+- [📦 Run Inference for all TCGA test data](#run-inference-for-all-tcga-test-data)
 
 - [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
   - [Step 1 – Extract Tiles from WSI](#step-1-extract-tiles-from-wsi)
@@ -106,14 +106,13 @@ These four cases provide a quick demonstration. See **Other Example Data** below
 
 ---
 
-## 📦 Other Example Data
+## 📦 Run Inference for all TCGA test data
 
 The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
-
 [Download example data from Zenodo](https://doi.org/10.5281/zenodo.22089643)
 
-See [Step 4: Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction) for inference instructions.
-
+See [Step 4: Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction) for inference instructions.  
+See [Step 5: Evaluate Model Performance](#step-5-evaluate-model-performance) for bootstrapped performance estimates.
 
 ## 🧬 Mutation Prediction Pipeline
 Before running the full pipeline, follow [Environment Setup for the Full WSI Pipeline](#environment-setup-for-the-full-wsi-pipeline).
