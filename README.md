@@ -52,7 +52,7 @@ tcga_examples/
 ├── TCGA-HC-8216_uni2.h5
 └── TCGA-HC-7737_uni2.h5
 ```
-Download links and slide filenames for the four TCGA whole-slide images are listed in [`tcga_examples/WSI_DOWNLOAD_LINKS.txt`](tcga_examples/WSI_DOWNLOAD_LINKS.txt).
+Download links for the four TCGA whole-slide images are listed in [`tcga_examples/WSI_DOWNLOAD_LINKS.txt`](tcga_examples/WSI_DOWNLOAD_LINKS.txt). The original WSI is not required for quick start. 
 
 ### 3. Run prediction
 
