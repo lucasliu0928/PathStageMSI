@@ -154,7 +154,8 @@ if __name__ == '__main__':
     #Load normalization norm target image
     ############################################################################################################
     if args.stain_norm == "norm":
-        tile_norm_img_path = os.path.join(proj_dir,'intermediate_data/6A_tile_for_stain_norm/')
+        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        tile_norm_img_path = os.path.join(repo_dir, 'stain_norm_img')
         norm_target_img = io.imread(os.path.join(tile_norm_img_path, 'SU21-19308_A1-2_HE_40X_MH110821_40_16500-20500_500-500.png'))
     elif args.stain_norm == "no_norm":
         norm_target_img = None
