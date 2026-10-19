@@ -17,8 +17,9 @@ This repository provides a step-by-step workflow for histopathology data analysi
 ---
 ## 📚 Table of Contents
 
+- [🚀 Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
+
 - [🚀 Getting Started](#-getting-started)
-  - [Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
   - [Clone the Repository](#clone-the-repository)
   - [Environment Setup (Example)](#environment-setup-example)
 
@@ -32,50 +33,6 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Step 5 – Evaluate Model Performance](#step-5-evaluate-model-performance)
  
 ---
-
-## 🚀 Getting Started
-### Clone the repository
-
-```bash
-git clone https://github.com/lucasliu0928/PathStageMSI.git
-cd PathStageMSI
-```
-
-### Environment Setup
-#### For Cancer Detection
-```
-conda env create -f env_files/paimg9.yml
-conda activate paimg9
-```
-
-#### For MSI Prediction:
-```
-conda env create -f env_files/mil.yml
-conda activate mil
-```
-
-## Main Dependencies
-* For cancer detection
-   - Python 3.8.20  [GCC 13.3.0]
-   - cv2 == 4.10.0
-   - fastai == 2.7.10
-   - torch == 2.4.1+cu121
-   - torchvision == 0.19.1+cu121
-   - openslide == 1.3.1
-   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
-* For MSI prediction
-  - Python 3.9.23 [GCC 13.3.0]
-  - torch == 2.8.0
-  - torchvision == 0.23.0
-  - pandas == 2.3.2
-  - numpy == 1.26.4
-  - scipy == 1.13.1
-  - scikit-learn == 1.6.1
-  - h5py == 3.14.0
-  - tqdm == 4.67.1
-  - nystrom-attention == 0.0.14
-  - einops == 0.8.1
- 
 
 ## Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps
 
@@ -152,6 +109,49 @@ These four cases provide a quick demonstration. See **Other Example Data** below
 
 ---
 
+## 🚀 Getting Started
+### Clone the repository
+
+```bash
+git clone https://github.com/lucasliu0928/PathStageMSI.git
+cd PathStageMSI
+```
+
+### Environment Setup
+#### For Cancer Detection
+```
+conda env create -f env_files/paimg9.yml
+conda activate paimg9
+```
+
+#### For MSI Prediction:
+```
+conda env create -f env_files/mil.yml
+conda activate mil
+```
+
+## Main Dependencies
+* For cancer detection
+   - Python 3.8.20  [GCC 13.3.0]
+   - cv2 == 4.10.0
+   - fastai == 2.7.10
+   - torch == 2.4.1+cu121
+   - torchvision == 0.19.1+cu121
+   - openslide == 1.3.1
+   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
+* For MSI prediction
+  - Python 3.9.23 [GCC 13.3.0]
+  - torch == 2.8.0
+  - torchvision == 0.23.0
+  - pandas == 2.3.2
+  - numpy == 1.26.4
+  - scipy == 1.13.1
+  - scikit-learn == 1.6.1
+  - h5py == 3.14.0
+  - tqdm == 4.67.1
+  - nystrom-attention == 0.0.14
+  - einops == 0.8.1
+    
 ## 📦 Other Example Data
 
 The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
