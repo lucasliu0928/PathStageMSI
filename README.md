@@ -157,7 +157,7 @@ The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
 
 [Download example data from Zenodo](https://doi.org/10.5281/zenodo.22089643)
 
-See [Run the four TCGA examples](tcga_examples/README.md) for inference commands, ensemble attention maps, and expected results.
+See [Step 4: Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction) for inference instructions.
 
 ## 🧬 Mutation Prediction Pipeline
 
