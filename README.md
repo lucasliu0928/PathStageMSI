@@ -19,10 +19,6 @@ This repository provides a step-by-step workflow for histopathology data analysi
 
 - [🚀 Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps](#quick-start-predict-four-tcga-cases-and-generate-attention-heatmaps)
 
-- [🚀 Getting Started](#-getting-started)
-  - [Clone the Repository](#clone-the-repository)
-  - [Environment Setup (Example)](#environment-setup-example)
-
 - [📦 Other Example Data](#other-example-data)
 
 - [🧬 Mutation Prediction Pipeline](#-i-mutation-prediction-pipeline)
@@ -31,7 +27,8 @@ This repository provides a step-by-step workflow for histopathology data analysi
   - [Step 3 – Generate Embeddings](#step-3-generate-embeddings)
   - [Step 4 – Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction)
   - [Step 5 – Evaluate Model Performance](#step-5-evaluate-model-performance)
- 
+    
+- [Environment Setup for the Full WSI Pipeline](#environment-setup-for-the-full-wsi-pipeline)
 ---
 
 ## Quick Start: Predict Four TCGA Cases and Generate Attention Heatmaps
@@ -109,49 +106,6 @@ These four cases provide a quick demonstration. See **Other Example Data** below
 
 ---
 
-## 🚀 Getting Started
-### Clone the repository
-
-```bash
-git clone https://github.com/lucasliu0928/PathStageMSI.git
-cd PathStageMSI
-```
-
-### Environment Setup
-#### For Cancer Detection
-```
-conda env create -f env_files/paimg9.yml
-conda activate paimg9
-```
-
-#### For MSI Prediction:
-```
-conda env create -f env_files/mil.yml
-conda activate mil
-```
-
-## Main Dependencies
-* For cancer detection
-   - Python 3.8.20  [GCC 13.3.0]
-   - cv2 == 4.10.0
-   - fastai == 2.7.10
-   - torch == 2.4.1+cu121
-   - torchvision == 0.19.1+cu121
-   - openslide == 1.3.1
-   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
-* For MSI prediction
-  - Python 3.9.23 [GCC 13.3.0]
-  - torch == 2.8.0
-  - torchvision == 0.23.0
-  - pandas == 2.3.2
-  - numpy == 1.26.4
-  - scipy == 1.13.1
-  - scikit-learn == 1.6.1
-  - h5py == 3.14.0
-  - tqdm == 4.67.1
-  - nystrom-attention == 0.0.14
-  - einops == 0.8.1
-    
 ## 📦 Other Example Data
 
 The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
@@ -160,7 +114,10 @@ The model-ready TCGA-PRAD example inference dataset is available on Zenodo:
 
 See [Step 4: Run Inference for MSI-H/dMMR Prediction](#step-4-run-inference-for-msi-hdmmr-prediction) for inference instructions.
 
+
 ## 🧬 Mutation Prediction Pipeline
+Before running the full pipeline, follow [Environment Setup for the Full WSI Pipeline](#environment-setup-for-the-full-wsi-pipeline).
+Run each command block below starting from the repository root.
 
 ### Step 1: Extract Tiles from WSI
 
@@ -214,8 +171,7 @@ This step uses selected foundation models to compute tile-level embeddings.
 
 ```
 conda activate paimg9
-cd cancer_detection_feature_generation
-python3 -u 4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tuned_model True --feature_extraction_method uni2
+python3 -u cancer_detection_feature_generation/4_get_feature.py --cohort_name TCGA_PRAD --pixel_overlap 0 --fine_tuned_model True --feature_extraction_method uni2
 ```
 
 **Supported models:** `retccl`, `uni1`, `uni2`, `prov_gigapath`, `virchow2`.
@@ -230,9 +186,8 @@ This step runs locked models for MSI prediction.
 
 ```bash
 conda activate mil
-cd PathStageMSI
-
-python3 -u inference/inference.py \
+cd inference
+python3 -u inference.py \
   --test_data /path/to/test_data.pth \
   --model_dir locked_models \
   --output_dir output/predictions \
@@ -244,16 +199,56 @@ python3 -u inference/inference.py \
 If ground-truth labels are available in the prediction CSV, compute bootstrap confidence intervals:
 
 ```bash
-python inference/bootstrap_performance.py \
+cd inference
+python3 bootstrap_performance.py \
   --prediction_csv output/predictions/ensemble_prediction.csv \
   --output_csv output/predictions/bootstrap_performance.csv \
   --cohort_name test
 ```
 
+## Environment Setup for the Full WSI Pipeline
+### Clone the repository
+
+```bash
+git clone https://github.com/lucasliu0928/PathStageMSI.git
+cd PathStageMSI
+```
+
+### Cancer detection and feature extraction environment
+```
+conda env create -f env_files/paimg9.yml
+conda activate paimg9
+```
+
+### MSI prediction environment
+```
+conda env create -f env_files/mil.yml
+conda activate mil
+```
+
+### Main dependencies
+* For cancer detection
+   - Python 3.8.20  [GCC 13.3.0]
+   - cv2 == 4.10.0
+   - fastai == 2.7.10
+   - torch == 2.4.1+cu121
+   - torchvision == 0.19.1+cu121
+   - openslide == 1.3.1
+   - histomicstk == 1.3.14 (python -m pip install histomicstk --find-links https://girder.github.io/large_image_wheels)
+* For MSI prediction
+  - Python 3.9.23 [GCC 13.3.0]
+  - torch == 2.8.0
+  - torchvision == 0.23.0
+  - pandas == 2.3.2
+  - numpy == 1.26.4
+  - scipy == 1.13.1
+  - scikit-learn == 1.6.1
+  - h5py == 3.14.0
+  - tqdm == 4.67.1
+  - nystrom-attention == 0.0.14
+  - einops == 0.8.1
 
 
-
-    
 ## Authors
 Lucas J. Liu 
 jliu6@fredhutch.org
